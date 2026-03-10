@@ -18,9 +18,9 @@ local Settings = {
         SnaplineEnabled = true,
         SnaplinePosition = "Center",
         RainbowEnabled = false,
-        NameESP = false,          -- عرض اسم اللاعب
-        TeamCheck = true,         -- تجاهل الفريق
-        OffScreenArrow = false    -- سهم خارج الشاشة
+        NameESP = false,
+        TeamCheck = true,
+        OffScreenArrow = false
     },
     Aimbot = {
         Enabled = false,
@@ -28,10 +28,10 @@ local Settings = {
         MaxDistance = 200,
         ShowFOV = false,
         TargetPart = "Head",
-        SmoothAim = 50,           -- 1-100 (سرعة التصويب)
-        MagicAim = false,         -- تصويب قوي (يتجاوز المؤشر)
-        AutoFire = false,         -- إطلاق نار تلقائي
-        FullHead = false          -- جميع الإصابات في الرأس
+        SmoothAim = 50,
+        MagicAim = false,
+        AutoFire = false,
+        FullHead = false
     },
     Combo = {
         InfiniteJump = {
@@ -40,7 +40,7 @@ local Settings = {
         },
         Speed = {
             Enabled = false,
-            Value = 3               -- 1-6
+            Value = 3
         },
         NoWall = false
     }
@@ -49,7 +49,6 @@ local Settings = {
 -- تخزين الرسومات
 local ESP_Drawings = {}
 local CurrentTarget = nil
-local CurrentTool = nil
 
 -- دوال مساعدة
 local function GetTeam(player)
@@ -70,8 +69,8 @@ local function CreateESP(Player)
         HealthBar = Drawing.new("Square"),
         Distance = Drawing.new("Text"),
         Snapline = Drawing.new("Line"),
-        NameTag = Drawing.new("Text"),        -- اسم اللاعب
-        Arrow = Drawing.new("Triangle")       -- سهم خارج الشاشة
+        NameTag = Drawing.new("Text"),
+        Arrow = Drawing.new("Triangle")
     }
     
     Drawings.Box.Thickness = 2
@@ -126,12 +125,10 @@ local function UpdateESP(Player, Drawings)
     local Distance = (Head.Position - Camera.CFrame.Position).Magnitude
     local Scale = 1000 / Distance
     
-    -- مربع ESP
     Drawings.Box.Size = Vector2.new(Scale, Scale * 1.5)
     Drawings.Box.Position = Vector2.new(HeadPos.X - Scale/2, HeadPos.Y - Scale * 0.75)
     Drawings.Box.Visible = OnScreen
     
-    -- شريط الصحة
     local HealthPercent = Humanoid.Health / Humanoid.MaxHealth
     local HealthColorIndex = math.clamp(3 - HealthPercent * 2, 1, 3)
     local HealthColor = Settings.ESP.HealthGradient[math.floor(HealthColorIndex)]:Lerp(
@@ -147,12 +144,10 @@ local function UpdateESP(Player, Drawings)
     Drawings.HealthBar.Color = HealthColor
     Drawings.HealthBar.Visible = OnScreen
     
-    -- المسافة
     Drawings.Distance.Text = math.floor(Distance) .. "m"
     Drawings.Distance.Position = Vector2.new(HeadPos.X, HeadPos.Y + Scale * 0.75 + 5)
     Drawings.Distance.Visible = OnScreen
     
-    -- اسم اللاعب
     if Settings.ESP.NameESP then
         Drawings.NameTag.Position = Vector2.new(HeadPos.X, HeadPos.Y - Scale * 0.75 - 20)
         Drawings.NameTag.Visible = OnScreen
@@ -160,7 +155,6 @@ local function UpdateESP(Player, Drawings)
         Drawings.NameTag.Visible = false
     end
     
-    -- ألوان قوس قزح
     if Settings.ESP.RainbowEnabled then
         local Hue = (tick() * 0.5) % 1
         Drawings.Box.Color = Color3.fromHSV(Hue, 1, 1)
@@ -172,7 +166,6 @@ local function UpdateESP(Player, Drawings)
         Drawings.Arrow.Color = Settings.ESP.BoxColor
     end
     
-    -- خط الـ Snapline
     if Settings.ESP.SnaplineEnabled and OnScreen then
         local SnaplineY
         if Settings.ESP.SnaplinePosition == "Bottom" then
@@ -190,14 +183,12 @@ local function UpdateESP(Player, Drawings)
         Drawings.Snapline.Visible = false
     end
     
-    -- سهم خارج الشاشة
     if Settings.ESP.OffScreenArrow and not OnScreen then
         local Center = Camera.ViewportSize / 2
         local Dir = (Vector2.new(HeadPos.X, HeadPos.Y) - Center).Unit
         local ArrowPos = Center + Dir * 100
         local Angle = math.atan2(Dir.Y, Dir.X)
         
-        -- رسم مثلث صغير
         local Point1 = ArrowPos + Vector2.new(math.cos(Angle) * 20, math.sin(Angle) * 20)
         local Point2 = ArrowPos + Vector2.new(math.cos(Angle + 2.5) * 10, math.sin(Angle + 2.5) * 10)
         local Point3 = ArrowPos + Vector2.new(math.cos(Angle - 2.5) * 10, math.sin(Angle - 2.5) * 10)
@@ -230,7 +221,6 @@ local function FindBestTarget()
                 local Distance = (Head.Position - Camera.CFrame.Position).Magnitude
                 
                 if Angle <= Settings.Aimbot.FOV / 2 and Distance <= Settings.Aimbot.MaxDistance then
-                    -- Raycast
                     local RaycastParams = RaycastParams.new()
                     RaycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
                     RaycastParams.FilterType = Enum.RaycastFilterType.Blacklist
@@ -271,7 +261,7 @@ ScreenGui.DisplayOrder = 1000
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 370, 0, 400)  -- أطول لاستيعاب الخيارات
+MainFrame.Size = UDim2.new(0, 370, 0, 400)
 MainFrame.Position = UDim2.new(0, 10, 0, 10)
 MainFrame.BackgroundColor3 = Color3.new(0.05, 0.05, 0.05)
 MainFrame.BorderSizePixel = 0
@@ -292,16 +282,6 @@ UIGradient.Color = ColorSequence.new({
 UIGradient.Rotation = 90
 UIGradient.Parent = MainFrame
 
-local ImageLabel = Instance.new("ImageLabel")
-ImageLabel.Size = UDim2.new(1, 10, 1, 10)
-ImageLabel.Position = UDim2.new(0, -5, 0, -5)
-ImageLabel.BackgroundTransparency = 1
-ImageLabel.Image = "rbxassetid://131604521"
-ImageLabel.ImageColor3 = Color3.new(0, 0, 0)
-ImageLabel.ImageTransparency = 0.5
-ImageLabel.ZIndex = 99
-ImageLabel.Parent = MainFrame
-
 local TitleBar = Instance.new("Frame")
 TitleBar.Name = "TitleBar"
 TitleBar.Size = UDim2.new(1, 0, 0, 30)
@@ -312,7 +292,7 @@ TitleBar.Parent = MainFrame
 
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Name = "TitleLabel"
-TitleLabel.Size = UDim2.new(0, 180, 0, 30)
+TitleLabel.Size = UDim2.new(0, 200, 0, 30)
 TitleLabel.Position = UDim2.new(0, 10, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -323,21 +303,33 @@ TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.ZIndex = 102
 TitleLabel.Parent = TitleBar
 
+-- زر الإغلاق (X)
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 20, 0, 20)
+CloseButton.Position = UDim2.new(1, -25, 0, 5)
+CloseButton.BackgroundColor3 = Color3.new(1, 0, 0)
+CloseButton.TextColor3 = Color3.new(1, 1, 1)
+CloseButton.Text = "X"
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextSize = 16
+CloseButton.ZIndex = 102
+CloseButton.Parent = TitleBar
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
 local MinimizeButton = Instance.new("TextButton")
 MinimizeButton.Name = "MinimizeButton"
 MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
-MinimizeButton.Position = UDim2.new(1, -25, 0, 5)
-MinimizeButton.BackgroundColor3 = Color3.new(1, 0, 0)
+MinimizeButton.Position = UDim2.new(1, -50, 0, 5)
+MinimizeButton.BackgroundColor3 = Color3.new(1, 0.5, 0)
 MinimizeButton.TextColor3 = Color3.new(1, 1, 1)
 MinimizeButton.Text = "-"
 MinimizeButton.Font = Enum.Font.GothamBold
 MinimizeButton.TextSize = 20
 MinimizeButton.ZIndex = 102
 MinimizeButton.Parent = TitleBar
-
-local MinimizeCorner = Instance.new("UICorner")
-MinimizeCorner.CornerRadius = UDim.new(0, 5)
-MinimizeCorner.Parent = MinimizeButton
 
 local TabsFrame = Instance.new("Frame")
 TabsFrame.Name = "TabsFrame"
@@ -422,33 +414,30 @@ local ComboContent = CreateScrollTab("Combo")
 AimbotContent.Visible = false
 ComboContent.Visible = false
 
--- دالة لإضافة عنصر داخل ScrollingFrame مع تحديث CanvasSize
-local function AddWidget(parent, widget, height)
-    widget.Parent = parent
-    parent.CanvasSize = UDim2.new(0, 0, 0, parent.CanvasSize.Y.Offset + height + 10)
-end
+-- دوال مساعدة لوضع العناصر داخل الـ ScrollingFrame
+local ESP_Y = 10
+local AIMBOT_Y = 10
+local COMBO_Y = 10
 
-local Y = 10
-local function NextY(h)
-    local cur = Y
-    Y = Y + h + 10
-    return cur
+local function AddWidget(parent, widget, height, yVar)
+    widget.Parent = parent
+    widget.Position = UDim2.new(0, 10, 0, yVar)
+    parent.CanvasSize = UDim2.new(0, 0, 0, yVar + height + 10)
+    return yVar + height + 10
 end
 
 -- عناصر ESP
 do
-    Y = 10
     -- ESP toggle
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "ESP"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(ESPContent, btn, 40)
+    ESP_Y = AddWidget(ESPContent, btn, 40, ESP_Y)
     
     local ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -457,7 +446,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.ESP.Enabled = not Settings.ESP.Enabled
@@ -467,14 +456,13 @@ do
     -- Snapline toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Snapline"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(ESPContent, btn, 40)
+    ESP_Y = AddWidget(ESPContent, btn, 40, ESP_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -483,17 +471,16 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.ESP.SnaplineEnabled = not Settings.ESP.SnaplineEnabled
         TweenService:Create(ind, TweenInfo.new(0.2), {BackgroundColor3 = Settings.ESP.SnaplineEnabled and Color3.new(0,1,0) or Color3.new(1,0,0)}):Play()
     end)
     
-    -- Snapline position
+    -- Snapline position label
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(0, 180, 0, 20)
-    lbl.Position = UDim2.new(0, 10, 0, NextY(20))
     lbl.BackgroundTransparency = 1
     lbl.TextColor3 = Color3.new(1,1,1)
     lbl.Text = "Position:"
@@ -501,11 +488,11 @@ do
     lbl.TextSize = 14
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.ZIndex = 101
-    AddWidget(ESPContent, lbl, 20)
+    ESP_Y = AddWidget(ESPContent, lbl, 20, ESP_Y)
     
+    -- Snapline position dropdown
     local posBtn = Instance.new("TextButton")
     posBtn.Size = UDim2.new(0, 180, 0, 40)
-    posBtn.Position = UDim2.new(0, 10, 0, NextY(40))
     posBtn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     posBtn.TextColor3 = Color3.new(1, 1, 1)
     posBtn.Text = Settings.ESP.SnaplinePosition
@@ -513,7 +500,7 @@ do
     posBtn.TextSize = 14
     posBtn.TextXAlignment = Enum.TextXAlignment.Center
     posBtn.ZIndex = 101
-    AddWidget(ESPContent, posBtn, 40)
+    ESP_Y = AddWidget(ESPContent, posBtn, 40, ESP_Y)
     local posCycle = {"Center","Top","Bottom"}
     local posIdx = 1
     posBtn.MouseButton1Click:Connect(function()
@@ -525,14 +512,13 @@ do
     -- Rainbow toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Rainbow"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(ESPContent, btn, 40)
+    ESP_Y = AddWidget(ESPContent, btn, 40, ESP_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -541,7 +527,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.ESP.RainbowEnabled = not Settings.ESP.RainbowEnabled
@@ -551,14 +537,13 @@ do
     -- Name ESP toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Name ESP"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(ESPContent, btn, 40)
+    ESP_Y = AddWidget(ESPContent, btn, 40, ESP_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -567,7 +552,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.ESP.NameESP = not Settings.ESP.NameESP
@@ -577,14 +562,13 @@ do
     -- Team Check toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Team Check"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(ESPContent, btn, 40)
+    ESP_Y = AddWidget(ESPContent, btn, 40, ESP_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -593,7 +577,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.ESP.TeamCheck = not Settings.ESP.TeamCheck
@@ -603,14 +587,13 @@ do
     -- Off-Screen Arrow toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Off-Screen Arrow"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(ESPContent, btn, 40)
+    ESP_Y = AddWidget(ESPContent, btn, 40, ESP_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -619,7 +602,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.ESP.OffScreenArrow = not Settings.ESP.OffScreenArrow
@@ -629,18 +612,16 @@ end
 
 -- عناصر Aimbot
 do
-    Y = 10
     -- Aimbot toggle
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Aimbot"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(AimbotContent, btn, 40)
+    AIMBOT_Y = AddWidget(AimbotContent, btn, 40, AIMBOT_Y)
     
     local ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -649,7 +630,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.Aimbot.Enabled = not Settings.Aimbot.Enabled
@@ -659,14 +640,13 @@ do
     -- FOV Circle toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "FOV Circle"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(AimbotContent, btn, 40)
+    AIMBOT_Y = AddWidget(AimbotContent, btn, 40, AIMBOT_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -675,7 +655,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.Aimbot.ShowFOV = not Settings.Aimbot.ShowFOV
@@ -683,10 +663,9 @@ do
         TweenService:Create(ind, TweenInfo.new(0.2), {BackgroundColor3 = Settings.Aimbot.ShowFOV and Color3.new(0,1,0) or Color3.new(1,0,0)}):Play()
     end)
     
-    -- FOV value
+    -- FOV label
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(0, 180, 0, 20)
-    lbl.Position = UDim2.new(0, 10, 0, NextY(20))
     lbl.BackgroundTransparency = 1
     lbl.TextColor3 = Color3.new(1,1,1)
     lbl.Text = "FOV:"
@@ -694,18 +673,18 @@ do
     lbl.TextSize = 14
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.ZIndex = 101
-    AddWidget(AimbotContent, lbl, 20)
+    AIMBOT_Y = AddWidget(AimbotContent, lbl, 20, AIMBOT_Y)
     
+    -- FOV textbox
     local fovBox = Instance.new("TextBox")
     fovBox.Size = UDim2.new(0, 180, 0, 40)
-    fovBox.Position = UDim2.new(0, 10, 0, NextY(40))
     fovBox.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     fovBox.TextColor3 = Color3.new(1, 1, 1)
     fovBox.Text = tostring(Settings.Aimbot.FOV)
     fovBox.Font = Enum.Font.GothamBold
     fovBox.TextSize = 14
     fovBox.ZIndex = 101
-    AddWidget(AimbotContent, fovBox, 40)
+    AIMBOT_Y = AddWidget(AimbotContent, fovBox, 40, AIMBOT_Y)
     fovBox.FocusLost:Connect(function(enter)
         if enter then
             local v = tonumber(fovBox.Text)
@@ -714,10 +693,9 @@ do
         end
     end)
     
-    -- Max Distance
+    -- Max Distance label
     lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(0, 180, 0, 20)
-    lbl.Position = UDim2.new(0, 10, 0, NextY(20))
     lbl.BackgroundTransparency = 1
     lbl.TextColor3 = Color3.new(1,1,1)
     lbl.Text = "Max Distance:"
@@ -725,18 +703,18 @@ do
     lbl.TextSize = 14
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.ZIndex = 101
-    AddWidget(AimbotContent, lbl, 20)
+    AIMBOT_Y = AddWidget(AimbotContent, lbl, 20, AIMBOT_Y)
     
+    -- Distance textbox
     local distBox = Instance.new("TextBox")
     distBox.Size = UDim2.new(0, 180, 0, 40)
-    distBox.Position = UDim2.new(0, 10, 0, NextY(40))
     distBox.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     distBox.TextColor3 = Color3.new(1, 1, 1)
     distBox.Text = tostring(Settings.Aimbot.MaxDistance)
     distBox.Font = Enum.Font.GothamBold
     distBox.TextSize = 14
     distBox.ZIndex = 101
-    AddWidget(AimbotContent, distBox, 40)
+    AIMBOT_Y = AddWidget(AimbotContent, distBox, 40, AIMBOT_Y)
     distBox.FocusLost:Connect(function(enter)
         if enter then
             local v = tonumber(distBox.Text)
@@ -745,10 +723,9 @@ do
         end
     end)
     
-    -- Smooth Aim
+    -- Smooth Aim label
     lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(0, 180, 0, 20)
-    lbl.Position = UDim2.new(0, 10, 0, NextY(20))
     lbl.BackgroundTransparency = 1
     lbl.TextColor3 = Color3.new(1,1,1)
     lbl.Text = "Smooth Aim (1-100):"
@@ -756,18 +733,18 @@ do
     lbl.TextSize = 14
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.ZIndex = 101
-    AddWidget(AimbotContent, lbl, 20)
+    AIMBOT_Y = AddWidget(AimbotContent, lbl, 20, AIMBOT_Y)
     
+    -- Smooth Aim textbox
     local smoothBox = Instance.new("TextBox")
     smoothBox.Size = UDim2.new(0, 180, 0, 40)
-    smoothBox.Position = UDim2.new(0, 10, 0, NextY(40))
     smoothBox.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     smoothBox.TextColor3 = Color3.new(1, 1, 1)
     smoothBox.Text = tostring(Settings.Aimbot.SmoothAim)
     smoothBox.Font = Enum.Font.GothamBold
     smoothBox.TextSize = 14
     smoothBox.ZIndex = 101
-    AddWidget(AimbotContent, smoothBox, 40)
+    AIMBOT_Y = AddWidget(AimbotContent, smoothBox, 40, AIMBOT_Y)
     smoothBox.FocusLost:Connect(function(enter)
         if enter then
             local v = tonumber(smoothBox.Text)
@@ -779,14 +756,13 @@ do
     -- Magic Aim toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Magic Aim"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(AimbotContent, btn, 40)
+    AIMBOT_Y = AddWidget(AimbotContent, btn, 40, AIMBOT_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -795,7 +771,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.Aimbot.MagicAim = not Settings.Aimbot.MagicAim
@@ -805,14 +781,13 @@ do
     -- Auto Fire toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Auto Fire"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(AimbotContent, btn, 40)
+    AIMBOT_Y = AddWidget(AimbotContent, btn, 40, AIMBOT_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -821,7 +796,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.Aimbot.AutoFire = not Settings.Aimbot.AutoFire
@@ -831,14 +806,13 @@ do
     -- Full Head toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Full Head"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(AimbotContent, btn, 40)
+    AIMBOT_Y = AddWidget(AimbotContent, btn, 40, AIMBOT_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -847,7 +821,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.Aimbot.FullHead = not Settings.Aimbot.FullHead
@@ -857,18 +831,16 @@ end
 
 -- عناصر Combo
 do
-    Y = 10
     -- Infinite Jump
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Infinite Jump"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(ComboContent, btn, 40)
+    COMBO_Y = AddWidget(ComboContent, btn, 40, COMBO_Y)
     
     local ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -877,7 +849,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.Combo.InfiniteJump.Enabled = not Settings.Combo.InfiniteJump.Enabled
@@ -900,14 +872,13 @@ do
     -- Speed toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "Speed"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(ComboContent, btn, 40)
+    COMBO_Y = AddWidget(ComboContent, btn, 40, COMBO_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -916,17 +887,16 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.Combo.Speed.Enabled = not Settings.Combo.Speed.Enabled
         TweenService:Create(ind, TweenInfo.new(0.2), {BackgroundColor3 = Settings.Combo.Speed.Enabled and Color3.new(0,1,0) or Color3.new(1,0,0)}):Play()
     end)
     
-    -- Speed value
-    lbl = Instance.new("TextLabel")
+    -- Speed value label
+    local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(0, 180, 0, 20)
-    lbl.Position = UDim2.new(0, 10, 0, NextY(20))
     lbl.BackgroundTransparency = 1
     lbl.TextColor3 = Color3.new(1,1,1)
     lbl.Text = "Speed Value (1-6):"
@@ -934,18 +904,18 @@ do
     lbl.TextSize = 14
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.ZIndex = 101
-    AddWidget(ComboContent, lbl, 20)
+    COMBO_Y = AddWidget(ComboContent, lbl, 20, COMBO_Y)
     
+    -- Speed value textbox
     local speedBox = Instance.new("TextBox")
     speedBox.Size = UDim2.new(0, 180, 0, 40)
-    speedBox.Position = UDim2.new(0, 10, 0, NextY(40))
     speedBox.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     speedBox.TextColor3 = Color3.new(1, 1, 1)
     speedBox.Text = tostring(Settings.Combo.Speed.Value)
     speedBox.Font = Enum.Font.GothamBold
     speedBox.TextSize = 14
     speedBox.ZIndex = 101
-    AddWidget(ComboContent, speedBox, 40)
+    COMBO_Y = AddWidget(ComboContent, speedBox, 40, COMBO_Y)
     speedBox.FocusLost:Connect(function(enter)
         if enter then
             local v = tonumber(speedBox.Text)
@@ -957,14 +927,13 @@ do
     -- No Wall toggle
     btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 180, 0, 40)
-    btn.Position = UDim2.new(0, 10, 0, NextY(40))
     btn.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
     btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = "No Wall"
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.ZIndex = 101
-    AddWidget(ComboContent, btn, 40)
+    COMBO_Y = AddWidget(ComboContent, btn, 40, COMBO_Y)
     
     ind = Instance.new("Frame")
     ind.Size = UDim2.new(0, 20, 0, 20)
@@ -973,7 +942,7 @@ do
     ind.BorderSizePixel = 0
     ind.ZIndex = 102
     ind.Parent = btn
-    Instance.new("UICorner").CornerRadius = UDim.new(0,5); ind.Parent = ind
+    Instance.new("UICorner").CornerRadius = UDim.new(0,5).Parent = ind
     
     btn.MouseButton1Click:Connect(function()
         Settings.Combo.NoWall = not Settings.Combo.NoWall
@@ -981,40 +950,38 @@ do
     end)
 end
 
--- تطبيق تأثير hover على جميع الأزرار
+-- تطبيق تأثير Hover على جميع الأزرار (باستثناء أزرار التبويبات التي لها تأثير خاص)
 local function ApplyHover(btn)
-    local orig = btn.Size
+    local origSize = btn.Size
     btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {Size = orig + UDim2.new(0,5,0,5)}):Play()
-        btn.BackgroundColor3 = Color3.new(0.25,0.25,0.25)
+        TweenService:Create(btn, TweenInfo.new(0.2), {Size = origSize + UDim2.new(0,5,0,5), BackgroundColor3 = Color3.new(0.25,0.25,0.25)}):Play()
     end)
     btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.2), {Size = orig}):Play()
-        btn.BackgroundColor3 = Color3.new(0.15,0.15,0.15)
+        TweenService:Create(btn, TweenInfo.new(0.2), {Size = origSize, BackgroundColor3 = Color3.new(0.15,0.15,0.15)}):Play()
     end)
 end
 
+-- تطبيق Hover على جميع الأزرار
 for _, obj in ipairs(MainFrame:GetDescendants()) do
-    if obj:IsA("TextButton") and obj ~= MinimizeButton then
+    if obj:IsA("TextButton") and obj ~= MinimizeButton and obj ~= CloseButton then
         ApplyHover(obj)
     end
 end
 ApplyHover(MinimizeButton)
+ApplyHover(CloseButton)
 
 -- تبديل التبويبات
 local CurrentTab = "ESP"
-local function SwitchTab(tab)
-    CurrentTab = tab
-    ESPContent.Visible = tab == "ESP"
-    AimbotContent.Visible = tab == "Aimbot"
-    ComboContent.Visible = tab == "Combo"
-    for _, t in ipairs({ESPTab, AimbotTab, ComboTab}) do
-        if t.Name == tab.."TabButton" then
-            t.BackgroundColor3 = Color3.new(0.2,0.2,0.2)
-        else
-            t.BackgroundColor3 = Color3.new(0.15,0.15,0.15)
-        end
-    end
+local function SwitchTab(tabName)
+    CurrentTab = tabName
+    ESPContent.Visible = (tabName == "ESP")
+    AimbotContent.Visible = (tabName == "Aimbot")
+    ComboContent.Visible = (tabName == "Combo")
+    
+    -- تحديث ألوان أزرار التبويبات
+    ESPTab.BackgroundColor3 = (tabName == "ESP") and Color3.new(0.2,0.2,0.2) or Color3.new(0.15,0.15,0.15)
+    AimbotTab.BackgroundColor3 = (tabName == "Aimbot") and Color3.new(0.2,0.2,0.2) or Color3.new(0.15,0.15,0.15)
+    ComboTab.BackgroundColor3 = (tabName == "Combo") and Color3.new(0.2,0.2,0.2) or Color3.new(0.15,0.15,0.15)
 end
 
 ESPTab.MouseButton1Click:Connect(function() SwitchTab("ESP") end)
@@ -1035,18 +1002,17 @@ RunService.RenderStepped:Connect(function()
         pcall(function() UpdateESP(Player, Drawings) end)
     end
     
-    -- تحديث الـ Humanoid (Speed / No Wall)
+    -- تحديث سرعة المشي و No Wall
     if LocalPlayer.Character then
         local Humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if Humanoid then
             if Settings.Combo.Speed.Enabled then
                 Humanoid.WalkSpeed = Settings.Combo.Speed.Value
             else
-                Humanoid.WalkSpeed = 16 -- افتراضي
+                Humanoid.WalkSpeed = 16
             end
         end
         if Settings.Combo.NoWall then
-            -- تعطيل الاصطدام لجميع أجزاء اللاعب (قد لا يعمل مع الخادم)
             for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
                 if part:IsA("BasePart") then
                     part.CanCollide = false
@@ -1059,11 +1025,9 @@ RunService.RenderStepped:Connect(function()
     if Settings.Aimbot.Enabled and Camera then
         local BestTarget, BestAngle = FindBestTarget()
         
-        -- تطبيق Magic Aim: يجعل التصويب فورياً إذا كان الهدف موجوداً
         if Settings.Aimbot.MagicAim and BestTarget then
             CurrentTarget = BestTarget
         else
-            -- منطق Smooth Aim العادي
             if BestTarget then
                 if CurrentTarget and CurrentTarget ~= BestTarget then
                     if CurrentTarget.Character and CurrentTarget.Character:FindFirstChild("Head") then
@@ -1072,7 +1036,6 @@ RunService.RenderStepped:Connect(function()
                         local CurAngle = math.deg(math.acos(Dir:Dot(Camera.CFrame.LookVector)))
                         local Dist = (Head.Position - Camera.CFrame.Position).Magnitude
                         if CurAngle <= Settings.Aimbot.FOV/2 and Dist <= Settings.Aimbot.MaxDistance then
-                            -- ابق على الهدف الحالي إذا كان لا يزال صالحاً (لـ Smooth Aim)
                             BestTarget = CurrentTarget
                         else
                             CurrentTarget = BestTarget
@@ -1088,7 +1051,6 @@ RunService.RenderStepped:Connect(function()
             end
         end
         
-        -- التصويب نحو الهدف الحالي
         if CurrentTarget and CurrentTarget.Character then
             local Head = CurrentTarget.Character:FindFirstChild("Head")
             if Head then
@@ -1102,17 +1064,14 @@ RunService.RenderStepped:Connect(function()
         if Settings.Aimbot.AutoFire and CurrentTarget and CurrentTarget.Character then
             local Head = CurrentTarget.Character:FindFirstChild("Head")
             if Head then
-                -- فحص إذا كان الهدف في منتصف الشاشة (زاوية صغيرة)
                 local Dir = (Head.Position - Camera.CFrame.Position).Unit
                 local Look = Camera.CFrame.LookVector
                 local Angle = math.deg(math.acos(Dir:Dot(Look)))
-                if Angle < 5 then -- يعتبر في المنتصف
-                    -- محاكاة إطلاق نار
+                if Angle < 5 then
                     local Tool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
                     if Tool then
                         Tool:Activate()
                     else
-                        -- استخدام VirtualUser
                         VirtualUser:Button1Down(Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2))
                         wait(0.1)
                         VirtualUser:Button1Up(Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2))
